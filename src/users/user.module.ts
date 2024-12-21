@@ -1,24 +1,15 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { UsersController } from './user.controller';
 import { UsersService } from './users.service';
-import { UserAgentMiddleware } from 'src/middleware/user-agent.middleware';
+import { MongooseModule } from '@nestjs/mongoose';
+import { User, userSchema } from './schema/user.schema';
 
 @Module({
-  imports: [],
-  controllers: [UsersController],
-  providers: [
-    UsersService,
-    {
-      provide: 'TestFectory',
-      useFactory: () => {
-        return 'custom fectory';
-      },
-    },
+  imports: [
+    MongooseModule.forFeature([{ name: User.name, schema: userSchema }]),
   ],
-  exports: [UsersService],
+  controllers: [UsersController],
+  providers: [UsersService],
+  exports: [MongooseModule, UsersService],
 })
-export class UsersModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(UserAgentMiddleware).forRoutes('user');
-  }
-}
+export class UsersModule {}

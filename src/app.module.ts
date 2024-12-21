@@ -1,17 +1,28 @@
-import { MiddlewareConsumer, Module, NestModule, Logger } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { UsersModule } from './users/user.module';
-import { WinstonLogger } from './middleware/logger.moddleware';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
-import { UsersService } from './users/users.service';
+import { MongooseModule } from '@nestjs/mongoose';
+import { DummyModule } from './dummy/dummy.module';
+import { JwtModule } from '@nestjs/jwt';
 @Module({
-  imports: [UsersModule, ConfigModule.forRoot({ isGlobal: true }), AuthModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    MongooseModule.forRoot('mongodb://localhost:27017/starter-nest'),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get('JWT_SECRECT'),
+      }),
+      inject: [ConfigService],
+      global: true,
+    }),
+    AuthModule,
+    UsersModule,
+    DummyModule,
+  ],
   controllers: [],
-  providers: [Logger, UsersService],
-  exports: [UsersService],
+  providers: [],
+  exports: [],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(WinstonLogger).forRoutes('*');
-  }
-}
+export class AppModule {}
