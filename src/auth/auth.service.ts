@@ -14,7 +14,6 @@ export class AuthService {
 
   async checkExistingUser(email: string): Promise<userDocument> {
     const isExistUser = await this.userModel.findOne({ email }).select('_id');
-
     return isExistUser;
   }
 
